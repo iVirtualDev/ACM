@@ -4,6 +4,56 @@
 
 using namespace std;
 
+struct Integer
+{
+    int data;
+    bool is_inf;
+
+    Integer(int d):
+	data(d),
+	is_inf(false)
+    {}
+
+    static Integer get_inf();
+};
+
+Integer Integer::get_inf()
+{
+    Integer result(0);
+    result.is_inf = true;
+    return result;
+}
+
+Integer operator+(Integer left, Integer right)
+{
+    Integer result(0);
+    result.data = left.data + right.data;
+    result.is_inf = left.is_inf || right.is_inf;
+    return result;
+}
+
+bool operator<(Integer left, Integer right)
+{
+    if (left.is_inf && right.is_inf)
+	return false;
+    if (left.is_inf)
+	return false;
+    if (right.is_inf)
+	return true;
+    return (left.data < right.data);
+}
+
+bool operator==(Integer left, Integer right)
+{
+    if (left.is_inf && right.is_inf)
+	return true;
+    if (left.is_inf)
+	return false;
+    if (right.is_inf)
+	return false;
+    return (left.data == right.data);
+}
+
 int main()
 {
     int n;
@@ -30,48 +80,34 @@ int main()
 	return 0;
     }
 
-    vector<int> table(n + 1, -1);
-    vector<int> newtable(n + 1, -1);
-    table[1] = max(prices[n - 1], 0);
+    vector<Integer> table(n + 1, Integer::get_inf());
+    vector<Integer> newtable(n + 1, Integer::get_inf());
+    table[1] = Integer(max(prices[n - 1], 0));
 
     for (int k = 1; k < n; ++k)
     {
 	for (int i = 1; i < n + 1; ++i)
 	{
-	    if ((table[i] == -1) || (k == n - 1))
+	    if (k == n - 1)
 	    {
-		if (table[i - 1] != -1)
-		{
-		    assert(table[i - 1] >= 0);
-		    newtable[i] = max(table[i - 1] + prices[n - 1 - k], 0);
-		}
+		newtable[i] = max(table[i - 1] + Integer(prices[n - 1 - k]), Integer(0));
 	    }
 	    else
 	    {
-		if (table[i - 1] == -1)
-		{
-		    assert(table[i] >= 0);
-		    newtable[i] = table[i] + 100;
-		}
-		else
-		{
-		    assert(table[i - 1] >= 0);
-		    assert(table[i] >= 0);
-		    newtable[i] = min(
-			max(table[i - 1] + prices[n - 1 - k], 0),
-			table[i] + 100);
-		}
+		newtable[i] = min(
+			max(table[i - 1] + Integer(prices[n - 1 - k]), Integer(0)),
+			table[i] + Integer(100));
 	    }
 	}
 	newtable.swap(table);
 	for (int i = 0; i < n + 1; ++i)
 	{
-	    newtable[i] = -1;
+	    newtable[i] = Integer::get_inf();
 	}
     }
     for (int i = 0; i < n + 1; ++i)
     {
-	if (table[i] == 0)
+	if (table[i] == Integer(0))
 	{
 	    cout << i << endl;
 	    return 0;
