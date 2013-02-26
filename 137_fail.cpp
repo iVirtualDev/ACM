@@ -13,8 +13,8 @@ int main()
   cin >> n >> k;
 
   integer reminders[3];
-  reminders[0] = 1;
-  reminders[1] = 1;
+  reminders[0] = 1 % k;
+  reminders[1] = 1 % k;
 
   for (integer i = 2; i < n; ++i)
   {
